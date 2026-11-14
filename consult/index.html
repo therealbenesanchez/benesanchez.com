@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coffee Sessions with Bene Sanchez</title>
+<meta name="description" content="Book a Zoom consultation, a group class, a one-on-one brewing session or competition coaching with Bene Sanchez.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: matches the Brewing Better Workshop deck. Warm paper-grey ground, near-black ink, big tight-tracked headlines, small uppercase labels. One question per screen. */
+:root {
+  --ground: #e2e1dc;      /* deck paper grey */
+  --surface: #eae9e5;
+  --raised: #f2f1ed;
+  --line: #c9c6be;
+  --ink: #2a2c2e;         /* deck ink */
+  --muted: #6e6a64;
+  --accent: #2a2c2e;      /* monochrome, like the slides */
+  --accent-ink: #f2f1ed;
+  --rust: #c2622d;        /* from the "sugars" curve, used sparingly */
+  --error: #b4442a;
+  --font-display: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+[hidden] { display: none !important; }
+.progress { position: fixed; inset: 0 0 auto 0; height: 4px; background: var(--line); z-index: 5; }
+.progress span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .35s ease; }
+
+header.brand {
+  position: fixed; top: 4px; left: 0; right: 0;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  padding: 18px clamp(16px, 5vw, 48px);
+  font-family: var(--font-display); font-weight: 600; letter-spacing: .01em;
+  background: linear-gradient(var(--ground) 60%, transparent);
+  z-index: 4;
+}
+header.brand small { font-family: var(--font-body); font-weight: 500; color: var(--muted); font-size: 13px; }
+
+main {
+  min-height: 100%;
+  display: flex; align-items: flex-start;
+  padding: clamp(104px, 16vh, 168px) clamp(16px, 5vw, 48px) 120px;
+}
+.step { width: 100%; max-width: 680px; margin: 0 auto; display: none; }
+.step.wide { max-width: 940px; }
+.step.active { display: block; animation: rise .35s ease both; }
+@keyframes rise { from { transform: translateY(14px); opacity: .4; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .step.active, .sheet, .scrim { animation: none !important; } .progress span { transition: none; } }
+
+.qnum { display: flex; align-items: center; gap: 8px; color: var(--accent); font-weight: 600; font-size: 15px; margin-bottom: 10px; }
+.qnum svg { width: 14px; height: 14px; }
+h1, h2 {
+  font-family: var(--font-display); font-weight: 600; text-wrap: balance;
+  margin: 0 0 18px; line-height: 1.15; letter-spacing: -.01em;
+}
+h1 { font-size: clamp(34px, 6vw, 54px); margin-bottom: 10px; }
+h2 { font-size: clamp(24px, 4vw, 32px); }
+.hint { color: var(--muted); margin: -8px 0 22px; max-width: 60ch; }
+.lede { color: var(--muted); font-size: 19px; margin: 0 0 26px; }
+.intro { font-family: var(--font-display); font-weight: 400; font-size: clamp(19px, 2.6vw, 22px); color: var(--muted); margin: 0 0 4px; }
+.optional { color: var(--muted); font-weight: 400; font-size: .62em; }
+
+/* credentials: hover for the short list, click for the full bio */
+.cred { position: relative; display: inline-block; }
+.cred-trigger {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: none; border: 0; padding: 4px 0; cursor: pointer;
+  color: var(--muted); font: 500 15px var(--font-body);
+}
+.cred-trigger b { color: var(--ink); font-weight: 600; border-bottom: 1px dotted var(--muted); }
+.cred-trigger svg { width: 16px; height: 16px; color: var(--accent); }
+.cred-trigger:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.cred-pop {
+  position: absolute; right: 0; top: calc(100% + 8px); z-index: 6;
+  font-family: var(--font-body); font-weight: 400; letter-spacing: 0;
+  width: max-content; max-width: min(340px, 86vw);
+  background: var(--raised); border: 1px solid var(--line); border-radius: 10px;
+  padding: 14px 16px; box-shadow: 0 14px 40px rgba(0,0,0,.45);
+  opacity: 0; transform: translateY(-4px); pointer-events: none;
+  transition: opacity .15s, transform .15s;
+}
+.cred:hover .cred-pop, .cred-trigger:focus-visible + .cred-pop { opacity: 1; transform: none; }
+.cred-pop .who { font-family: var(--font-display); font-weight: 600; font-size: 17px; margin-bottom: 6px; }
+.cred-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 14px; }
+.cred-list li { display: flex; gap: 10px; }
+.cred-list .yr { color: var(--accent); font-variant-numeric: tabular-nums; font-weight: 600; }
+.cred-pop .more { margin-top: 10px; font-size: 13px; color: var(--muted); }
+@media (hover: none) { .cred-pop { display: none; } }
+
+.scrim { position: fixed; inset: 0; background: rgba(8,5,3,.6); z-index: 9; animation: fade .2s ease both; }
+.sheet {
+  position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); z-index: 10;
+  width: min(760px, 100%); max-height: 88vh; overflow-y: auto;
+  background: var(--raised); border: 1px solid var(--line); border-bottom: 0;
+  border-radius: 16px 16px 0 0; padding: 28px clamp(20px, 5vw, 40px) 36px;
+  animation: up .28s ease both;
+}
+@keyframes up { from { transform: translate(-50%, 30px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+@keyframes fade { from { opacity: 0; } }
+.sheet-head { display: flex; justify-content: space-between; align-items: start; gap: 16px; margin-bottom: 14px; }
+.sheet h2 { margin: 0; }
+.sheet .cred-list { font-size: 15px; gap: 6px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+.sheet p { margin: 0; max-width: 62ch; color: var(--ink); }
+.close {
+  flex: none; width: 36px; height: 36px; border-radius: 8px; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--line); color: var(--ink); font-size: 18px; line-height: 1;
+}
+.close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+input[type=text], input[type=email], textarea {
+  width: 100%; background: transparent; color: var(--ink);
+  border: 0; border-bottom: 2px solid var(--line);
+  font: 500 clamp(20px, 3.4vw, 26px)/1.4 var(--font-body);
+  padding: 8px 0 10px; outline: none; border-radius: 0;
+  transition: border-color .2s;
+}
+textarea { resize: vertical; min-height: 120px; font-size: 20px; }
+input::placeholder, textarea::placeholder { color: #6f6056; }
+input:focus, textarea:focus { border-bottom-color: var(--accent); }
+
+.choices { display: grid; gap: 10px; max-width: 520px; }
+.choices.row { grid-template-columns: repeat(5, minmax(0, 1fr)); max-width: 420px; }
+.choice {
+  display: flex; align-items: center; gap: 14px; width: 100%;
+  text-align: left; cursor: pointer;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 10px;
+  padding: 13px 16px; font: 500 17px/1.35 var(--font-body);
+  transition: border-color .15s, background .15s;
+}
+.choices.row .choice { justify-content: center; font-size: 20px; font-variant-numeric: tabular-nums; }
+.choice:hover { border-color: var(--muted); }
+.choice:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.choice .key {
+  flex: none; width: 26px; height: 26px; display: grid; place-items: center;
+  border: 1px solid var(--line); border-radius: 6px;
+  font-size: 13px; font-weight: 600; color: var(--muted);
+}
+.choice .txt { flex: 1; }
+.choice[aria-pressed="true"] { border-color: var(--accent); background: var(--raised); }
+.choice[aria-pressed="true"] .key { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+/* session cards */
+.cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.card {
+  position: relative;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 14px;
+  text-align: left; cursor: pointer; min-height: 178px;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 14px; padding: 20px 18px;
+  font: inherit;
+  transition: border-color .18s ease, background-color .18s ease, transform .18s cubic-bezier(.2,.8,.3,1), box-shadow .18s ease;
+}
+.card:hover { border-color: var(--muted); transform: translateY(-3px); box-shadow: 0 10px 24px rgba(0,0,0,.28); }
+.card:active { transform: translateY(-1px) scale(.985); }
+.card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.card svg { width: 40px; height: 40px; color: var(--muted); transition: color .18s ease, transform .22s cubic-bezier(.2,.8,.3,1); }
+.card:hover svg { color: var(--accent); transform: scale(1.06); }
+.card .title { font-family: var(--font-display); font-weight: 600; font-size: 19px; line-height: 1.2; }
+.card .price {
+  margin-top: auto; color: var(--accent); font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums;
+  opacity: 0; transform: translateY(6px); transition: opacity .2s ease, transform .22s cubic-bezier(.2,.8,.3,1);
+}
+.card[aria-pressed="true"] { border-color: var(--accent); background: var(--raised); animation: pick .28s cubic-bezier(.2,.8,.3,1); }
+.card[aria-pressed="true"] svg { color: var(--accent); }
+.card[aria-pressed="true"] .price { opacity: 1; transform: none; }
+@keyframes pick { 0% { transform: scale(.975); } 60% { transform: scale(1.015); } 100% { transform: scale(1); } }
+
+.detail-wrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .26s cubic-bezier(.2,.8,.3,1); }
+.detail-wrap.open { grid-template-rows: 1fr; }
+.detail-clip { overflow: hidden; min-height: 0; }
+.detail {
+  margin-top: 14px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  padding: 20px 22px;
+  transition: opacity .12s ease, transform .16s ease;
+}
+.detail.swap { opacity: 0; transform: translateY(4px); }
+.detail .cost { display: none; }
+.detail.priced .cost { display: inline-block; animation: pop .22s cubic-bezier(.2,.8,.3,1); }
+@keyframes pop { from { opacity: 0; transform: scale(.9); } }
+
+.choice:active { transform: scale(.985); }
+.choice { transition: border-color .15s ease, background-color .15s ease, transform .12s ease; }
+.choice .key { transition: background-color .15s ease, color .15s ease, border-color .15s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .card, .card svg, .card .price, .detail, .detail-wrap, .choice { transition: none !important; animation: none !important; }
+  .card:hover { transform: none; }
+}
+.detail h3 { font-family: var(--font-display); font-weight: 600; font-size: 20px; margin: 0 0 8px; }
+.detail p { margin: 0 0 10px; max-width: 72ch; }
+.detail .facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.detail .facts span { border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; font-size: 14px; color: var(--muted); }
+.detail .facts span.cost { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); font-weight: 600; }
+.detail .placeholder { color: var(--muted); margin: 0; }
+.detail .addon { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+.detail .addon h4 { margin: 0 0 8px; font-family: var(--font-body); font-weight: 600; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
+.info {
+  background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+  border-radius: 10px; padding: 16px 18px; margin: 0 0 24px; font-size: 15px;
+}
+.info p { margin: 0 0 8px; }
+.info p:last-child { margin: 0; color: var(--muted); }
+
+.actions { display: flex; align-items: center; gap: 16px; margin-top: 28px; flex-wrap: wrap; }
+.btn {
+  background: var(--accent); color: var(--accent-ink);
+  border: 0; border-radius: 8px; cursor: pointer;
+  font: 600 17px var(--font-body); padding: 12px 22px;
+}
+.btn:hover { filter: brightness(1.06); }
+.btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.btn[disabled] { opacity: .6; cursor: progress; }
+.enter-hint { color: var(--muted); font-size: 13px; }
+.enter-hint kbd { font: inherit; font-weight: 600; color: var(--ink); }
+.error { color: var(--error); font-size: 15px; margin-top: 12px; min-height: 1.4em; }
+
+.nav {
+  position: fixed; right: clamp(16px, 5vw, 48px); bottom: 22px;
+  display: flex; gap: 2px; z-index: 4;
+}
+.nav button {
+  width: 40px; height: 36px; border: 0; cursor: pointer;
+  background: var(--surface); color: var(--ink);
+}
+.nav button:first-child { border-radius: 8px 0 0 8px; }
+.nav button:last-child { border-radius: 0 8px 8px 0; }
+.nav button:focus-visible { outline: 2px solid var(--accent); }
+.nav button[disabled] { opacity: .35; cursor: default; }
+
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.summary { border-top: 1px solid var(--line); margin-top: 26px; padding-top: 18px; color: var(--muted); font-size: 15px; display: grid; gap: 4px; }
+.summary b { color: var(--ink); font-weight: 600; }
+.preview-note { margin-top: 18px; font-size: 14px; color: var(--muted); border-left: 3px solid var(--accent); padding-left: 12px; }
+
+@media (max-width: 760px) {
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card { min-height: 150px; }
+}
+@media (max-width: 420px) {
+  .enter-hint { display: none; }
+  .choices.row { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+}
+
+/* ---------- deck styling ---------- */
+.progress { height: 3px; }
+header.brand { font-family: var(--font-body); font-weight: 500; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; }
+.cred-trigger { font-size: 14px; letter-spacing: .08em; text-transform: uppercase; }
+.cred-trigger b { font-weight: 500; border-bottom-color: var(--ink); }
+.cred-trigger svg { color: var(--ink); }
+.cred-pop { box-shadow: 0 16px 40px rgba(42,44,46,.16); text-transform: none; }
+.cred-list .yr { color: var(--rust); }
+.cred-pop .who, .sheet h2 { font-weight: 400; letter-spacing: -.02em; }
+.scrim { background: rgba(42,44,46,.35); }
+
+h1, h2 { font-weight: 400; letter-spacing: -.035em; }
+h1 { font-size: clamp(48px, 9vw, 104px); line-height: .95; letter-spacing: -.05em; margin-bottom: 22px; }
+h2 { font-size: clamp(32px, 5vw, 52px); line-height: 1.02; margin-bottom: 24px; }
+.deck-arrow { display: block; width: clamp(72px, 9vw, 120px); height: auto; color: var(--ink); margin-bottom: 28px; }
+.lede, .intro, .qnum, .hint, .optional, .enter-hint, .field-label {
+  font-family: var(--font-body); text-transform: uppercase; letter-spacing: .06em;
+}
+.lede { font-size: clamp(14px, 1.6vw, 17px); color: var(--ink); margin-bottom: 36px; }
+.intro { font-size: 15px; color: var(--muted); margin-bottom: 10px; }
+.qnum { color: var(--muted); font-weight: 500; font-size: 13px; }
+.hint { font-size: 13px; }
+.optional { font-size: 13px; vertical-align: middle; letter-spacing: .06em; }
+.enter-hint { font-size: 12px; }
+
+input[type=text], input[type=email], textarea { font-family: var(--font-display); font-weight: 400; letter-spacing: -.02em; border-bottom-width: 1.5px; }
+input::placeholder, textarea::placeholder { color: #a39e95; }
+
+.choice { border-radius: 4px; font-weight: 400; }
+.choice:hover { border-color: var(--ink); }
+.choice .key { border-radius: 3px; font-family: var(--font-body); }
+.choice[aria-pressed="true"] { background: var(--ink); color: var(--accent-ink); border-color: var(--ink); }
+.choice[aria-pressed="true"] .key { background: var(--accent-ink); color: var(--ink); border-color: var(--accent-ink); }
+
+.card { border-radius: 6px; }
+.card:hover { border-color: var(--ink); box-shadow: 0 12px 28px rgba(42,44,46,.12); }
+.card svg { color: var(--ink); stroke-width: 1.6; }
+.card:hover svg { color: var(--ink); }
+.card .title { font-weight: 400; font-size: 22px; letter-spacing: -.02em; }
+.card .price { font-family: var(--font-body); font-weight: 500; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent-ink); }
+.card[aria-pressed="true"] { background: var(--ink); color: var(--accent-ink); border-color: var(--ink); }
+.card[aria-pressed="true"] svg { color: var(--accent-ink); }
+
+.detail { border-radius: 6px; background: var(--raised); }
+.detail h3 { font-weight: 400; font-size: 26px; letter-spacing: -.03em; }
+.detail .facts span { border-radius: 3px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+.detail .facts span.cost { background: var(--ink); color: var(--accent-ink); border-color: var(--ink); }
+.info { border-radius: 6px; background: var(--raised); border-left-color: var(--ink); }
+
+.btn { border-radius: 4px; font-weight: 500; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; padding: 14px 26px; }
+.btn:hover { filter: none; background: #000; }
+.close { border-radius: 4px; }
+.nav button { background: var(--raised); }
+.nav button:first-child { border-radius: 4px 0 0 4px; }
+.nav button:last-child { border-radius: 0 4px 4px 0; }
+.summary b { font-weight: 600; }
+
+/* something else */
+.else { position: relative; display: inline-flex; align-items: center; gap: 14px; margin-top: 16px; flex-wrap: wrap; }
+.else-btn {
+  background: none; border: 0; padding: 6px 0; cursor: pointer; color: var(--ink);
+  font: 500 13px var(--font-body); letter-spacing: .08em; text-transform: uppercase;
+  border-bottom: 1px solid var(--ink); transition: opacity .15s ease;
+}
+.else-btn span { display: inline-block; transition: transform .2s cubic-bezier(.2,.8,.3,1); }
+.else-btn:hover span, .else-btn:focus-visible span { transform: translateX(4px); }
+.else-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+.else-tip {
+  font-size: 14px; color: var(--muted);
+  opacity: 0; transform: translateX(-6px); transition: opacity .18s ease, transform .2s cubic-bezier(.2,.8,.3,1); pointer-events: none;
+}
+.else:hover .else-tip, .else-btn:focus-visible + .else-tip { opacity: 1; transform: none; }
+@media (hover: none) { .else-tip { opacity: 1; transform: none; } }
+.compose label { display: block; margin-top: 16px; font-size: 12px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.compose input, .compose textarea { font-size: 20px !important; }
+.compose textarea { min-height: 110px; }
+.compose-sub { color: var(--muted); margin: 0 0 4px; }
+.home-link { color: inherit; text-decoration: none; }
+.home-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+</style>
+</head>
+<body>
+<div class="progress" aria-hidden="true"><span id="bar"></span></div>
+<header class="brand">
+  <a class="home-link" href="/">Bene Sanchez</a>
+  <div class="cred">
+    <button type="button" class="cred-trigger" id="credTrigger" aria-haspopup="dialog">
+      <b>About Bene</b>
+      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.2v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="4.8" r=".95" fill="currentColor"/></svg>
+    </button>
+    <div class="cred-pop" role="tooltip">
+      <div class="who">Bene Sanchez</div>
+      <ul class="cred-list">
+        <li><span class="yr">2025</span><span>Philippine National Brewers Cup Champion</span></li>
+        <li><span class="yr">2023</span><span>Philippine National Brewers Cup, 2nd Place</span></li>
+        <li><span class="yr">2023</span><span>April Brewers Cup Champion</span></li>
+      </ul>
+      <div class="more">Click to read more</div>
+    </div>
+  </div>
+</header>
+
+<main>
+<form id="form" novalidate autocomplete="on">
+  <!-- spam trap: real people never see or fill this -->
+  <div class="hp" aria-hidden="true"><label for="website">Website</label><input type="text" id="website" name="website" tabindex="-1" autocomplete="off"></div>
+
+  <!-- Welcome -->
+  <section class="step" data-step="welcome">
+    <svg class="deck-arrow" viewBox="0 0 120 36" aria-hidden="true"><path d="M0 18h104" stroke="currentColor" stroke-width="5"/><path d="M96 2c2 9 9 15 22 16-13 1-20 7-22 16" fill="none" stroke="currentColor" stroke-width="5"/></svg>
+    <h1>Let's make your next cup better.</h1>
+    <p class="lede">Coffee consultation, classes, and other offerings.</p>
+    <div class="actions" style="margin-top:0">
+      <button type="button" class="btn" data-next>Start</button>
+      <span class="enter-hint">press <kbd>Enter ↵</kbd></span>
+    </div>
+  </section>
+
+  <section class="step" data-step="level" data-required data-choice="level">
+    <div class="qnum"></div>
+    <p class="intro">Tell me a little about yourself.</p>
+    <h2>Coffee journey</h2>
+    <div class="choices" role="group" aria-label="Coffee journey">
+      <button type="button" class="choice" data-value="Just getting started"><span class="key">A</span><span class="txt">Just getting started</span></button>
+      <button type="button" class="choice" data-value="Home brewer"><span class="key">B</span><span class="txt">Home brewer</span></button>
+      <button type="button" class="choice" data-value="Barista / working in coffee"><span class="key">C</span><span class="txt">Barista or working in coffee</span></button>
+      <button type="button" class="choice" data-value="Coffee shop owner"><span class="key">D</span><span class="txt">Coffee shop owner</span></button>
+      <button type="button" class="choice" data-value="Competing or planning to"><span class="key">E</span><span class="txt">Competing, or planning to</span></button>
+    </div>
+    <div class="error" role="alert"></div>
+  </section>
+
+  <!-- Session type: four cards, details on hover / tap -->
+  <section class="step wide" data-step="service" data-required data-choice="service" data-noauto>
+    <div class="qnum"></div>
+    <h2>How can I help?</h2>
+    <div class="cards" role="group" aria-label="Session type">
+      <button type="button" class="card choice-card" data-value="Zoom consultation" data-key="a" aria-describedby="detail">
+        <svg viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="11" width="22" height="18" rx="3"/><path d="M26 17l9-5v16l-9-5z"/></svg>
+        <span class="title">Zoom consultation</span>
+        <span class="price">₱2,500 · 40 min</span>
+      </button>
+      <button type="button" class="card choice-card" data-value="Group class" data-key="b" aria-describedby="detail">
+        <svg viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="20" cy="13" r="5"/><path d="M11 32c0-5 4-9 9-9s9 4 9 9"/><circle cx="8.5" cy="17" r="3.5"/><path d="M2.5 31c0-3.6 2.7-6.5 6-6.5"/><circle cx="31.5" cy="17" r="3.5"/><path d="M37.5 31c0-3.6-2.7-6.5-6-6.5"/></svg>
+        <span class="title">Group class</span>
+        <span class="price">₱4,000 · up to 6 people</span>
+      </button>
+      <button type="button" class="card choice-card" data-value="One-on-one brewing session" data-key="c" aria-describedby="detail">
+        <svg viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M8 7h24l-8 13h-8z"/><path d="M5 7h30"/><path d="M20 20v3"/><path d="M11 25h18v6a4 4 0 0 1-4 4h-10a4 4 0 0 1-4-4z"/><path d="M29 27h2a2.5 2.5 0 0 1 0 5h-2"/></svg>
+        <span class="title">One-on-one brewing</span>
+        <span class="price">₱25,000 · 4–6 hours</span>
+      </button>
+      <button type="button" class="card choice-card" data-value="Coaching" data-key="d" aria-describedby="detail">
+        <svg viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M12 5h16v10a8 8 0 0 1-16 0z"/><path d="M12 8H6v3a6 6 0 0 0 6 6"/><path d="M28 8h6v3a6 6 0 0 1-6 6"/><path d="M20 23v6"/><path d="M13 35h14l-2-6H15z"/></svg>
+        <span class="title">Competition coaching</span>
+        <span class="price">Inquire</span>
+      </button>
+    </div>
+    <div class="detail-wrap" id="detailWrap"><div class="detail-clip"><div class="detail" id="detail" aria-live="polite"></div></div></div>
+    <div class="else">
+      <button type="button" class="else-btn" id="elseBtn" aria-describedby="elseTip">I need something else <span aria-hidden="true">→</span></button>
+      <span class="else-tip" id="elseTip" role="tooltip">For other coffee consultation needs, send me an email here.</span>
+    </div>
+    <div class="error" role="alert"></div>
+    <div class="actions"><button type="button" class="btn" data-next>Continue</button><span class="enter-hint">press <kbd>Enter ↵</kbd></span></div>
+
+    <div hidden>
+      <div id="d-Zoom consultation">
+        <h3>Zoom consultation</h3>
+        <p>A 40-minute call for any of your questions about coffee brewing, your setup, or anything coffee related.</p>
+        <p>For beginners who want guidance on where to start their brewing journey, I can help you choose the right equipment for you, where to start in terms of brewing recipes, sensory, or anything you want. No such thing as a stupid question, you can ask away.</p>
+        <div class="facts"><span>40 minutes</span><span>Online</span><span class="cost">₱2,500</span></div>
+      </div>
+      <div id="d-Zoom consultation|brewer">
+        <h3>Zoom consultation</h3>
+        <p>A 40-minute call for any of your questions about coffee brewing, your setup, or anything coffee related. We can talk about grinders, brewing methods, brewing water, drippers, filters, brewing tips, and even making espresso at home!</p>
+        <p>Also, if there's a coffee you're having a hard time dialing in, you can brew it during the call and I can guide you through some possible adjustments.</p>
+        <div class="facts"><span>40 minutes</span><span>Online</span><span class="cost">₱2,500</span></div>
+      </div>
+      <div id="d-Zoom consultation|owner">
+        <h3>Zoom consultation</h3>
+        <p>A 40-minute call for any of your questions about coffee brewing, your setup, or anything coffee related.</p>
+        <p>For beginners who want guidance on where to start their brewing journey, or for more intermediate brewers struggling to dial in a particular coffee, we can figure it out together. We can even talk about improving or optimizing your handbrew program.</p>
+        <div class="facts"><span>40 minutes</span><span>Online</span><span class="cost">₱2,500</span></div>
+      </div>
+      <div id="d-Group class">
+        <h3>Group class</h3>
+        <p>A hands-on brewing workshop where you learn how to brew better with your own gear. The advantage of this format is learning and tasting together with other people, while still in an intimate and focused environment.</p>
+        <p>The schedule depends on the participants. After you select this, I'll put you on the waitlist right away and let you know the soonest schedule.</p>
+        <p>You can also choose to sign up as a group, and choose your own preferred date, subject to my availability.</p>
+        <div class="facts"><span>Max 6 participants</span><span>Class materials included</span><span class="cost">₱4,000</span></div>
+      </div>
+      <div id="d-barista">
+        <div class="addon"><h4>Barista program</h4>
+        <p>I can also offer a customized program for your staff. Oftentimes, pour-overs can be a weak spot at a coffee shop, whether because they're seldom ordered, for workflow reasons, or because of inconsistency among staff. I can help improve the handbrews based on your shop's context, your coffee beans and the needs of your customers. This will give your baristas more confidence to brew and sell more handbrews at your shop.</p>
+        <p>Minimum of 2 baristas, maximum of 6. Price starts at ₱4,000 per barista, with a group discount depending on the number of attendees.</p></div>
+      </div>
+      <div id="d-discount">
+        <div class="addon"><h4>Working in coffee? 20% off</h4>
+        <p>As a barista or coffee professional, you get 20% off when you join the waitlist for a class: <b>₱3,200</b> instead of ₱4,000. The discount applies to waitlist sign-ups only, not group bookings with your own date.</p></div>
+      </div>
+      <div id="d-One-on-one brewing session">
+        <h3>One-on-one brewing session</h3>
+        <p>A focused, in-person intermediate to advanced brewing class held at Eleven Coffee, customized to your needs and your pace. We'll tackle brewing theory, ratios, water composition and grind size to brew the kind of coffee you want to brew.</p>
+        <p>This can be customized for competitors, coffee shop owners, baristas and home brewers.</p>
+        <div class="facts"><span>4–6 hours</span><span>At Eleven Coffee</span><span>Coffee materials included</span><span class="cost">₱25,000</span></div>
+      </div>
+      <div id="d-Coaching">
+        <h3>Competition coaching</h3>
+        <p>For those looking for a coach for Brewers Cup-style competitions or Nationals. I would love to get to know you better. We can explore whether I'm the right coach for you through an online call.</p>
+        <div class="facts"><span>Brewers Cup format</span><span>Nationals</span><span>Online call</span><span class="cost">Inquire</span></div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Group class follow-ups -->
+  <section class="step" data-step="group_type" data-required data-choice="group_type" data-when="service=Group class">
+    <div class="qnum"></div>
+    <h2>Group class</h2>
+    <div class="choices" role="group" aria-label="Group class option">
+      <button type="button" class="choice" data-value="Join a class"><span class="key">A</span><span class="txt">I want to join a class</span></button>
+      <button type="button" class="choice" data-value="Enroll me and my friends"><span class="key">B</span><span class="txt">I want to enroll me and my friends into a class</span></button>
+      <button type="button" class="choice" data-value="Enroll my staff" id="staffOption"><span class="key">C</span><span class="txt">I want to enroll my staff</span></button>
+    </div>
+    <div class="error" role="alert"></div>
+  </section>
+
+  <section class="step" data-step="friends_size" data-required data-choice="group_size" data-when="group_type=Enroll me and my friends">
+    <div class="qnum"></div>
+    <h2>Number of people, including you</h2>
+    <div class="choices row" role="group" aria-label="Number of people">
+      <button type="button" class="choice" data-value="2">2</button>
+      <button type="button" class="choice" data-value="3">3</button>
+      <button type="button" class="choice" data-value="4">4</button>
+      <button type="button" class="choice" data-value="5">5</button>
+      <button type="button" class="choice" data-value="6">6</button>
+    </div>
+    <div class="error" role="alert"></div>
+  </section>
+
+  <section class="step" data-step="staff_size" data-required data-choice="group_size" data-when="group_type=Enroll my staff">
+    <div class="qnum"></div>
+    <h2>Barista program</h2>
+    <div class="info">
+      <p>I can also offer a customized program for your staff. Oftentimes, pour-overs can be a weak spot at a coffee shop, whether because they're seldom ordered, for workflow reasons, or because of inconsistency among staff. I can help improve the handbrews based on your shop's context, your coffee beans and the needs of your customers. This will give your baristas more confidence to brew and sell more handbrews at your shop.</p>
+        <p>Minimum of 2 baristas, maximum of 6. Price starts at ₱4,000 per barista, with a group discount depending on the number of attendees.</p>
+    </div>
+    <h2 style="font-size:20px;margin-bottom:12px">Number of baristas</h2>
+    <div class="choices row" role="group" aria-label="Number of baristas">
+      <button type="button" class="choice" data-value="2">2</button>
+      <button type="button" class="choice" data-value="3">3</button>
+      <button type="button" class="choice" data-value="4">4</button>
+      <button type="button" class="choice" data-value="5">5</button>
+      <button type="button" class="choice" data-value="6">6</button>
+    </div>
+    <div class="error" role="alert"></div>
+  </section>
+
+  <section class="step" data-step="schedule" data-required data-choice="class_schedule" data-when="service=Group class">
+    <div class="qnum"></div>
+    <h2>Preferred schedule</h2>
+    <div class="choices" role="group" aria-label="Preferred schedule">
+      <button type="button" class="choice" data-value="Weekdays"><span class="key">A</span><span class="txt">Weekdays</span></button>
+      <button type="button" class="choice" data-value="Weekends"><span class="key">B</span><span class="txt">Weekends</span></button>
+      <button type="button" class="choice" data-value="Either works"><span class="key">C</span><span class="txt">Either works</span></button>
+    </div>
+    <div class="error" role="alert"></div>
+  </section>
+
+  <section class="step" data-step="name" data-required>
+    <div class="qnum"></div>
+    <p class="intro" id="nameIntro">Okay, please let me know how I can contact you.</p>
+    <h2><label for="name">Name</label></h2>
+    <input type="text" id="name" name="name" placeholder="Full name" autocomplete="name">
+    <div class="error" role="alert"></div>
+    <div class="actions"><button type="button" class="btn" data-next>OK</button><span class="enter-hint">press <kbd>Enter ↵</kbd></span></div>
+  </section>
+
+  <section class="step" data-step="email" data-required>
+    <div class="qnum"></div>
+    <h2><label for="email">Email</label></h2>
+    <input type="email" id="email" name="email" placeholder="name@example.com" autocomplete="email" inputmode="email">
+    <div class="error" role="alert"></div>
+    <div class="actions"><button type="button" class="btn" data-next>OK</button><span class="enter-hint">press <kbd>Enter ↵</kbd></span></div>
+  </section>
+
+  <section class="step" data-step="location" data-required>
+    <div class="qnum"></div>
+    <h2><label for="location">Location</label></h2>
+    <input type="text" id="location" name="location" placeholder="City, country" autocomplete="address-level2">
+    <div class="error" role="alert"></div>
+    <div class="actions"><button type="button" class="btn" data-next>OK</button><span class="enter-hint">press <kbd>Enter ↵</kbd></span></div>
+  </section>
+
+
+  <section class="step" data-step="availability" data-when="service=Zoom consultation|One-on-one brewing session|Coaching">
+    <div class="qnum"></div>
+    <h2><label for="availability">Availability <span class="optional">(optional)</span></label></h2>
+    <input type="text" id="availability" name="availability" placeholder="e.g. weekday evenings, Saturday mornings">
+    <div class="error" role="alert"></div>
+    <div class="actions"><button type="button" class="btn" data-next>OK</button><span class="enter-hint">press <kbd>Enter ↵</kbd></span></div>
+  </section>
+
+  <section class="step" data-step="message" data-required>
+    <div class="qnum"></div>
+    <h2><label for="message">What topics are you interested in focusing on?</label></h2>
+    <textarea id="message" name="message"></textarea>
+    <div class="error" role="alert"></div>
+    <div class="actions"><button type="button" class="btn" data-next>OK</button><span class="enter-hint"><kbd>Shift + Enter ↵</kbd> for a new line</span></div>
+  </section>
+
+  <section class="step" data-step="source" data-choice="source">
+    <div class="qnum"></div>
+    <h2>How did you hear about me? <span class="optional">(optional)</span></h2>
+    <div class="choices" role="group" aria-label="How you heard about Bene">
+      <button type="button" class="choice" data-value="Instagram"><span class="key">A</span><span class="txt">Instagram</span></button>
+      <button type="button" class="choice" data-value="Friend or referral"><span class="key">B</span><span class="txt">A friend or referral</span></button>
+      <button type="button" class="choice" data-value="Brewers Cup / competition"><span class="key">C</span><span class="txt">Brewers Cup or a competition</span></button>
+      <button type="button" class="choice" data-value="A workshop or event"><span class="key">D</span><span class="txt">A workshop or event</span></button>
+      <button type="button" class="choice" data-value="Other"><span class="key">E</span><span class="txt">Other</span></button>
+    </div>
+    <div class="error" role="alert"></div>
+    <div class="actions"><button type="button" class="btn" id="submit" data-submit>Send to Bene</button><span class="enter-hint">press <kbd>Enter ↵</kbd></span></div>
+  </section>
+
+  <section class="step" data-step="done">
+    <h1>Thank you, <span data-fill="name">friend</span>.</h1>
+    <p class="lede" id="doneText">I'll read your message properly and reply to <b data-fill="email"></b> within two days. Watch your spam folder just in case.</p>
+    <div class="summary" id="summary"></div>
+    <p class="preview-note" id="previewNote" hidden>Preview mode: nothing was sent. Add your Apps Script URL to <code>ENDPOINT</code> to make the form live.</p>
+  </section>
+</form>
+</main>
+
+<div class="nav" aria-label="Question navigation">
+  <button type="button" id="prev" aria-label="Previous question">↑</button>
+  <button type="button" id="next" aria-label="Next question">↓</button>
+</div>
+
+<!-- Something else: compose -->
+<div class="sheet compose" id="compose" role="dialog" aria-modal="true" aria-labelledby="composeTitle" hidden>
+  <div class="sheet-head">
+    <h2 id="composeTitle">Send me an email</h2>
+    <button type="button" class="close" id="composeClose" aria-label="Close">✕</button>
+  </div>
+  <div id="composeForm">
+    <p class="compose-sub">For other coffee consultation needs. I'll reply personally within two days.</p>
+    <label for="else_name">Name</label>
+    <input type="text" id="else_name" autocomplete="name">
+    <label for="else_email">Email</label>
+    <input type="email" id="else_email" autocomplete="email" inputmode="email">
+    <label for="else_message">Message</label>
+    <textarea id="else_message" rows="4"></textarea>
+    <div class="error" id="composeError" role="alert"></div>
+    <div class="actions" style="margin-top:8px"><button type="button" class="btn" id="composeSend">Send email</button></div>
+  </div>
+  <div id="composeDone" hidden>
+    <p class="compose-sub">Thank you! Your message is on its way, and I'll reply within two days.</p>
+    <p class="preview-note" id="composePreview" hidden>Preview mode: nothing was sent.</p>
+  </div>
+</div>
+
+<!-- About banner -->
+<div class="scrim" id="scrim" hidden></div>
+<div class="sheet" id="bio" role="dialog" aria-modal="true" aria-labelledby="bioTitle" hidden>
+  <div class="sheet-head">
+    <h2 id="bioTitle">About Bene Sanchez</h2>
+    <button type="button" class="close" id="bioClose" aria-label="Close">✕</button>
+  </div>
+  <ul class="cred-list">
+    <li><span class="yr">2025</span><span>Philippine National Brewers Cup Champion</span></li>
+    <li><span class="yr">2023</span><span>Philippine National Brewers Cup, 2nd Place</span></li>
+    <li><span class="yr">2023</span><span>April Brewers Cup Champion</span></li>
+  </ul>
+  <p>Bene has been a student of specialty coffee for almost 10 years now. His deep love for manual brewing has turned him from a home brewer into a specialty coffee ambassador, sharing his love for coffee to the world. Through the years, he has refined his craft through countless brewing experiments, workshops from esteemed instructors, and competing. His goal now is to take people along with him on the journey, because the infinite possibilities of coffee are better explored together.</p>
+</div>
+
+<script>
+// Paste your Google Apps Script web app URL here (ends in /exec).
+// Left empty, the form runs in preview mode and sends nothing.
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbxSPWLa9gLJta5vWLTnsZkGEsl8zJxYn0AZz9Ul00uO5SEnzO6LJChvmXG3ucNnUdLbLQ/exec";
+
+const form = document.getElementById("form");
+const steps = [...form.querySelectorAll(".step")];
+const bar = document.getElementById("bar");
+const data = { level: "", service: "", group_type: "", group_size: "", class_schedule: "", source: "" };
+let current = 0;
+let sending = false;
+
+const arrow = '<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h9M7.5 3.5 11 7l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+/* ---------- conditional steps ---------- */
+function applies(step) {
+  const cond = step.dataset.when;
+  if (!cond) return true;
+  const neg = cond.includes("!=");
+  const i = cond.indexOf(neg ? "!=" : "=");
+  const field = cond.slice(0, i), values = cond.slice(i + (neg ? 2 : 1)).split("|");
+  if (neg ? values.includes(data[field]) : !values.includes(data[field])) return false;
+  // a group follow-up only applies while Group class is the chosen service
+  if (field === "group_type" && data.service !== "Group class") return false;
+  return true;
+}
+function visibleQuestions() {
+  return steps.filter(s => s.dataset.step !== "welcome" && s.dataset.step !== "done" && applies(s));
+}
+function numberQuestions() {
+  visibleQuestions().forEach((s, i) => { const q = s.querySelector(".qnum"); if (q) q.innerHTML = (i + 1) + " " + arrow; });
+}
+function syncStaffOption() {
+  const staff = document.getElementById("staffOption");
+  const isOwner = data.level === "Coffee shop owner";
+  staff.hidden = !isOwner;
+  const join = form.querySelector('[data-step="group_type"] .choice[data-value="Join a class"] .txt');
+  join.textContent = data.level === "Barista / working in coffee" ? "I want to join a class (20% barista discount)" : "I want to join a class";
+  if (!isOwner && data.group_type === "Enroll my staff") {
+    data.group_type = ""; data.group_size = "";
+    staff.setAttribute("aria-pressed", "false");
+  }
+}
+
+function fillNames() {
+  const name = (document.getElementById("name").value.trim().split(" ")[0]) || "friend";
+  document.querySelectorAll('[data-fill="name"]').forEach(el => el.textContent = name);
+  document.querySelectorAll('[data-fill="email"]').forEach(el => el.textContent = document.getElementById("email").value.trim());
+}
+function progress() {
+  const qs = visibleQuestions();
+  const idx = qs.indexOf(steps[current]);
+  const done = steps[current].dataset.step === "done";
+  bar.style.width = (done ? 100 : idx < 0 ? 0 : (idx / qs.length) * 100) + "%";
+  document.getElementById("prev").disabled = current === 0 || done;
+  document.getElementById("next").disabled = done;
+}
+function show(i) {
+  steps[current].classList.remove("active");
+  current = i;
+  const s = steps[current];
+  s.classList.add("active");
+  syncStaffOption(); fillNames(); numberQuestions(); progress();
+  const key = s.dataset.choice;
+  if (key && !("multi" in s.dataset)) s.querySelectorAll(".choice, .choice-card").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.value === data[key])));
+  const field = s.querySelector("input, textarea");
+  const firstChoice = s.querySelector('.choice[aria-pressed="true"], .choice-card[aria-pressed="true"]') || s.querySelector(".choice:not([hidden]), .choice-card");
+  setTimeout(() => (field || firstChoice || s.querySelector(".btn"))?.focus({ preventScroll: true }), 60);
+  window.scrollTo({ top: 0 });
+}
+function error(step, msg) { const e = step.querySelector(".error"); if (e) e.textContent = msg || ""; }
+
+function validate(step) {
+  error(step, "");
+  if (!("required" in step.dataset)) return true;
+  if (step.dataset.choice) {
+    const v = data[step.dataset.choice];
+    if (!v || (Array.isArray(v) && !v.length)) { error(step, "Please choose one to continue."); return false; }
+    return true;
+  }
+  const field = step.querySelector("input, textarea");
+  const v = field.value.trim();
+  if (!v) { error(step, "Please fill this in to continue."); return false; }
+  if (field.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) { error(step, "That email doesn't look right. Check for typos."); return false; }
+  return true;
+}
+function next() {
+  const step = steps[current];
+  if (step.dataset.step === "done" || sending) return;
+  if (step.querySelector("[data-submit]")) { submit(); return; }
+  if (!validate(step)) return;
+  let i = current + 1;
+  while (i < steps.length && !applies(steps[i])) i++;
+  show(i);
+}
+function prev() {
+  let i = current - 1;
+  while (i > 0 && !applies(steps[i])) i--;
+  if (i >= 0) show(i);
+}
+
+/* ---------- choice buttons ---------- */
+steps.forEach(step => {
+  const key = step.dataset.choice;
+  if (!key) return;
+  const multi = "multi" in step.dataset;
+  const auto = !("noauto" in step.dataset) && !step.querySelector("[data-submit]");
+  const btns = step.querySelectorAll(".choice, .choice-card");
+  btns.forEach(btn => {
+    btn.setAttribute("aria-pressed", "false");
+    btn.addEventListener("click", () => {
+      if (multi) {
+        btn.setAttribute("aria-pressed", String(btn.getAttribute("aria-pressed") !== "true"));
+        data[key] = [...step.querySelectorAll('.choice[aria-pressed="true"]')].map(b => b.dataset.value);
+      } else {
+        btns.forEach(b => b.setAttribute("aria-pressed", "false"));
+        btn.setAttribute("aria-pressed", "true");
+        data[key] = btn.dataset.value;
+        error(step, "");
+        if (key === "service") showDetail(btn.dataset.value);
+        if (key === "group_type") { data.group_size = ""; document.querySelectorAll('[data-choice="group_size"] .choice').forEach(b => b.setAttribute("aria-pressed", "false")); }
+        if (auto) setTimeout(next, 260);
+      }
+    });
+  });
+});
+
+/* ---------- session detail panel ---------- */
+const detail = document.getElementById("detail");
+const detailWrap = document.getElementById("detailWrap");
+let shown = "", swapTimer;
+function showDetail(value) {
+  const variant = value === "Zoom consultation"
+    ? ({ "Home brewer": "|brewer", "Barista / working in coffee": "|brewer", "Competing or planning to": "|brewer", "Coffee shop owner": "|owner" }[data.level] || "")
+    : "";
+  const src = value && (document.getElementById("d-" + value + variant) || document.getElementById("d-" + value));
+  if (!src) { detailWrap.classList.remove("open"); shown = ""; return; }
+  const priced = value === data.service;
+  const extraId = value !== "Group class" ? "" : data.level === "Coffee shop owner" ? "d-barista" : data.level === "Barista / working in coffee" ? "d-discount" : "";
+  const extra = extraId ? document.getElementById(extraId).innerHTML : "";
+  const render = () => { detail.innerHTML = src.innerHTML + extra; detail.classList.toggle("priced", priced); detail.classList.remove("swap"); };
+  clearTimeout(swapTimer);
+  if (!detailWrap.classList.contains("open")) { render(); detailWrap.classList.add("open"); }
+  else if (shown !== value + variant) { detail.classList.add("swap"); swapTimer = setTimeout(render, 110); }
+  else render();
+  shown = value + variant;
+}
+document.querySelectorAll(".choice-card").forEach(card => {
+  card.addEventListener("mouseenter", () => showDetail(card.dataset.value));
+  card.addEventListener("focus", () => showDetail(card.dataset.value));
+  card.addEventListener("mouseleave", () => { if (data.service) showDetail(data.service); });
+});
+
+/* ---------- about banner ---------- */
+const bio = document.getElementById("bio"), scrim = document.getElementById("scrim"), trigger = document.getElementById("credTrigger");
+function openBio() { bio.hidden = false; scrim.hidden = false; document.getElementById("bioClose").focus(); }
+function closeBio() { bio.hidden = true; scrim.hidden = true; trigger.focus(); }
+trigger.addEventListener("click", openBio);
+
+const compose = document.getElementById("compose");
+let composeSending = false;
+function openCompose() {
+  ["name", "email"].forEach(k => { const v = document.getElementById(k).value; const f = document.getElementById("else_" + k); if (v && !f.value) f.value = v; });
+  compose.hidden = false; scrim.hidden = false;
+  setTimeout(() => document.getElementById("else_name").focus(), 50);
+}
+function closeCompose() { compose.hidden = true; scrim.hidden = true; document.getElementById("elseBtn").focus(); }
+document.getElementById("elseBtn").addEventListener("click", openCompose);
+document.getElementById("composeClose").addEventListener("click", closeCompose);
+document.getElementById("composeSend").addEventListener("click", async () => {
+  if (composeSending) return;
+  const v = id => document.getElementById(id).value.trim();
+  const err = document.getElementById("composeError");
+  err.textContent = "";
+  if (!v("else_name") || !v("else_email") || !v("else_message")) { err.textContent = "Please fill in your name, email and message."; return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v("else_email"))) { err.textContent = "That email doesn't look right. Check for typos."; return; }
+  const btn = document.getElementById("composeSend");
+  composeSending = true; btn.disabled = true; btn.textContent = "Sending…";
+  const p = { submitted_at: new Date().toISOString(), service: "Something else", level: data.level,
+    name: v("else_name"), email: v("else_email"), message: v("else_message"), website: document.getElementById("website").value };
+  try {
+    if (ENDPOINT) await fetch(ENDPOINT, { method: "POST", mode: "no-cors", body: new URLSearchParams(p) });
+    else document.getElementById("composePreview").hidden = false;
+    document.getElementById("composeForm").hidden = true;
+    document.getElementById("composeDone").hidden = false;
+  } catch (e) {
+    err.textContent = "Something went wrong sending this. Check your connection and try again.";
+  } finally { composeSending = false; btn.disabled = false; btn.textContent = "Send email"; }
+});
+document.getElementById("bioClose").addEventListener("click", closeBio);
+scrim.addEventListener("click", () => { if (!compose.hidden) closeCompose(); else closeBio(); });
+
+form.addEventListener("click", e => { if (e.target.closest("[data-next]")) next(); if (e.target.closest("[data-submit]")) submit(); });
+form.addEventListener("submit", e => e.preventDefault());
+document.getElementById("prev").addEventListener("click", prev);
+document.getElementById("next").addEventListener("click", next);
+
+document.addEventListener("keydown", e => {
+  if (!bio.hidden) { if (e.key === "Escape") closeBio(); return; }
+  if (!compose.hidden) { if (e.key === "Escape") closeCompose(); return; }
+  const step = steps[current];
+  if (e.key === "Enter" && !(e.target.tagName === "TEXTAREA" && e.shiftKey)) {
+    if (e.target.closest?.(".choice, .choice-card, .cred-trigger")) return; // let the button click itself
+    e.preventDefault(); next(); return;
+  }
+  if (step.dataset.choice && /^[a-z]$/i.test(e.key) && !e.metaKey && !e.ctrlKey && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
+    const k = e.key.toLowerCase();
+    const btn = [...step.querySelectorAll(".choice:not([hidden]), .choice-card")].find(b =>
+      (b.dataset.key || b.querySelector(".key")?.textContent || "").toLowerCase() === k);
+    if (btn) { btn.click(); btn.focus(); }
+  }
+});
+
+/* ---------- submit ---------- */
+function payload() {
+  const v = id => document.getElementById(id).value.trim();
+  const svc = data.service, group = svc === "Group class";
+  return {
+    submitted_at: new Date().toISOString(),
+    name: v("name"), email: v("email"), location: v("location"),
+    level: data.level, service: svc,
+    group_type: group ? data.group_type : "",
+    group_size: group && data.group_type !== "Join a class" ? data.group_size : "",
+    class_schedule: group ? data.class_schedule : "",
+    discount: group && data.group_type === "Join a class" && data.level === "Barista / working in coffee" ? "20% barista discount" : "",
+    availability: !group ? v("availability") : "",
+    message: v("message"), source: data.source,
+    website: document.getElementById("website").value // honeypot
+  };
+}
+function renderSummary(p) {
+  let session = p.service;
+  if (p.group_type) session += " · " + p.group_type + (p.group_size ? " (" + p.group_size + ")" : "");
+  if (p.class_schedule) session += " · " + p.class_schedule;
+  const rows = [["Session", session], ["Coffee journey", p.level], ["Location", p.location]];
+  const box = document.getElementById("summary");
+  box.innerHTML = "";
+  rows.forEach(([k, val]) => { const d = document.createElement("div"); const b = document.createElement("b"); b.textContent = k + ": "; d.append(b, val); box.append(d); });
+  const done = document.getElementById("doneText");
+  if (p.group_type === "Join a class") {
+    done.innerHTML = "You're on the waitlist. I'll email <b data-fill=\"email\"></b> with the soonest schedule once the class fills up.";
+  } else if (p.group_type === "Enroll me and my friends") {
+    done.innerHTML = "I'll reply to <b data-fill=\"email\"></b> within two days so we can set a date that works for your group.";
+  }
+  fillNames();
+}
+
+async function submit() {
+  if (sending) return;
+  const p = payload();
+  const step = steps[current];
+  const btn = document.getElementById("submit");
+  sending = true; btn.disabled = true; btn.textContent = "Sending…"; error(step, "");
+  try {
+    if (ENDPOINT) {
+      // form-encoded body = no CORS preflight; Apps Script reads it as e.parameter
+      await fetch(ENDPOINT, { method: "POST", mode: "no-cors", body: new URLSearchParams(p) });
+    } else {
+      document.getElementById("previewNote").hidden = false;
+    }
+    renderSummary(p);
+    show(steps.length - 1);
+  } catch (err) {
+    error(step, "Something went wrong sending this. Check your connection and press Send again.");
+  } finally {
+    sending = false; btn.disabled = false; btn.textContent = "Send to Bene";
+  }
+}
+
+show(0);
+</script>
+</body>
+</html>
