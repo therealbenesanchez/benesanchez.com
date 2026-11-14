@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eleven Coffee</title>
+<meta name="description" content="Eleven Coffee, a home café in BF Homes by Bene Sanchez. Manual brewing, thoughtful espresso and sweet treats. Book your slot.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: one centered column. Competition photo, a big hello, two plain buttons. Same paper-grey and ink as /consult. */
+:root {
+  --ground: #e2e1dc;
+  --surface: #eae9e5;
+  --raised: #f2f1ed;
+  --line: #c9c6be;
+  --ink: #2a2c2e;
+  --muted: #6e6a64;
+  --paper: #f2f1ed;
+  --rust: #c2622d;
+  --font: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { background: var(--ground); color: var(--ink); font: 400 17px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+[hidden] { display: none !important; }
+
+header {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  padding: 22px clamp(16px, 5vw, 48px);
+  font-weight: 500; font-size: 14px; letter-spacing: .08em; text-transform: uppercase;
+}
+
+/* about bene */
+.cred { position: relative; display: inline-block; }
+.cred-trigger {
+  display: inline-flex; align-items: center; gap: 8px; background: none; border: 0; padding: 4px 0; cursor: pointer;
+  color: var(--ink); font: 500 14px var(--font); letter-spacing: .08em; text-transform: uppercase;
+}
+.cred-trigger b { font-weight: 500; border-bottom: 1px dotted var(--ink); }
+.cred-trigger svg { width: 16px; height: 16px; }
+.cred-trigger:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.cred-pop {
+  position: absolute; right: 0; top: calc(100% + 8px); z-index: 6; width: max-content; max-width: min(340px, 86vw);
+  background: var(--raised); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px;
+  box-shadow: 0 16px 40px rgba(42,44,46,.16); text-transform: none; letter-spacing: 0;
+  opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity .15s, transform .15s;
+}
+.cred:hover .cred-pop, .cred-trigger:focus-visible + .cred-pop { opacity: 1; transform: none; }
+.cred-pop .who { font-size: 18px; letter-spacing: -.02em; margin-bottom: 6px; }
+.cred-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 14px; }
+.cred-list li { display: flex; gap: 10px; }
+.cred-list .yr { color: var(--rust); font-weight: 600; font-variant-numeric: tabular-nums; }
+.cred-pop .more { margin-top: 10px; font-size: 13px; color: var(--muted); }
+@media (hover: none) { .cred-pop { display: none; } }
+
+.scrim { position: fixed; inset: 0; background: rgba(42,44,46,.35); z-index: 9; animation: fade .2s ease both; }
+.sheet {
+  position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); z-index: 10;
+  width: min(760px, 100%); max-height: 88vh; overflow-y: auto;
+  background: var(--raised); border: 1px solid var(--line); border-bottom: 0; border-radius: 16px 16px 0 0;
+  padding: 28px clamp(20px, 5vw, 40px) 36px; animation: up .28s ease both;
+}
+@keyframes up { from { transform: translate(-50%, 30px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+@keyframes fade { from { opacity: 0; } }
+.sheet-head { display: flex; justify-content: space-between; align-items: start; gap: 16px; margin-bottom: 14px; }
+.sheet h2 { margin: 0; font-weight: 400; font-size: clamp(28px, 4vw, 40px); letter-spacing: -.035em; }
+.sheet .cred-list { font-size: 15px; gap: 6px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+.sheet p { margin: 0; max-width: 62ch; }
+.close { flex: none; width: 36px; height: 36px; border-radius: 4px; cursor: pointer; background: var(--surface); border: 1px solid var(--line); color: var(--ink); font-size: 18px; }
+
+main {
+  max-width: 1000px; margin: 0 auto; text-align: center;
+  padding: clamp(8px, 3vh, 32px) clamp(16px, 5vw, 48px) 72px;
+}
+.photo { margin: 0 0 clamp(28px, 5vh, 48px); }
+.photo img {
+  display: block; width: 100%; height: auto; border-radius: 6px;
+  aspect-ratio: 3 / 2; object-fit: cover; background: var(--surface);
+  animation: rise .6s cubic-bezier(.2,.8,.3,1) both;
+}
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+h1 { font-weight: 400; font-size: clamp(44px, 7.5vw, 96px); line-height: .95; letter-spacing: -.05em; margin: 0 0 16px; text-wrap: balance; }
+.lede { font-size: clamp(13px, 1.5vw, 15px); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 32px; }
+.buttons { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 240px;
+  padding: 16px 28px; border-radius: 4px; border: 1px solid var(--ink);
+  background: var(--ink); color: var(--paper); text-decoration: none;
+  font-size: 14px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase;
+  transition: background-color .18s ease, color .18s ease, transform .18s cubic-bezier(.2,.8,.3,1), box-shadow .18s ease;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(42,44,46,.16); background: #000; }
+.btn-alt { background: transparent; color: var(--ink); }
+.btn-alt:hover { background: var(--ink); color: var(--paper); }
+.btn:active { transform: translateY(0) scale(.98); }
+.btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+footer { padding: 0 clamp(16px, 5vw, 48px) 32px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+@media (max-width: 560px) {
+  .btn { min-width: 0; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .photo img, .sheet, .scrim, .cred-pop { transition: none !important; animation: none !important; }
+  .btn:hover { transform: none; }
+}
+.home-link { color: inherit; text-decoration: none; }
+.home-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+.eleven .story { max-width: 62ch; margin: 0 auto 32px; text-align: left; display: grid; gap: 14px; }
+.eleven .story p { margin: 0; }
+.gallery {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;
+  margin-top: clamp(48px, 8vh, 80px);
+}
+.gallery img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 6px; aspect-ratio: 3 / 2; background: var(--surface); }
+.gallery .tall { grid-row: span 2; aspect-ratio: auto; }
+.gallery .wide { grid-column: 1 / -1; }
+.back { margin: 40px 0 0; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+.back a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--ink); padding-bottom: 2px; }
+@media (max-width: 560px) {
+  .gallery { grid-template-columns: 1fr; }
+  .gallery .tall { grid-row: auto; aspect-ratio: 2 / 3; }
+}
+</style>
+</head>
+<body>
+<header>
+  <a class="home-link" href="/">Bene Sanchez</a>
+  <div class="cred">
+    <button type="button" class="cred-trigger" id="credTrigger" aria-haspopup="dialog">
+      <b>About Bene</b>
+      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.2v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="4.8" r=".95" fill="currentColor"/></svg>
+    </button>
+    <div class="cred-pop" role="tooltip">
+      <div class="who">Bene Sanchez</div>
+      <ul class="cred-list">
+        <li><span class="yr">2025</span><span>Philippine National Brewers Cup Champion</span></li>
+        <li><span class="yr">2023</span><span>Philippine National Brewers Cup, 2nd Place</span></li>
+        <li><span class="yr">2023</span><span>April Brewers Cup Champion</span></li>
+      </ul>
+      <div class="more">Click to read more</div>
+    </div>
+  </div>
+</header>
+
+<main class="eleven">
+  <figure class="photo">
+    <img src="pour.jpg" alt="Pouring water from a gooseneck kettle into an orange dripper" width="1800" height="1200" fetchpriority="high">
+  </figure>
+  <h1>Coffee is a gift to the world.</h1>
+  <p class="lede">A home café in BF Homes</p>
+  <div class="story">
+    <p>I started Eleven in February 2025, as a humble space to share coffee with the world. We focus on the art of manual brewing, as well as thoughtful espresso, and some sweet treats to pair with them. The menu changes every time, with a wide selection of coffees from roasters local and abroad.</p>
+    <p>We are (unfortunately) open erratically, based on my schedule—usually Wednesdays, once a week.</p>
+  </div>
+  <nav class="buttons">
+    <a class="btn" href="https://calendly.com/benesanchez/eleven-coffee">Book your slot</a>
+  </nav>
+  <div class="gallery">
+    <img class="tall" src="dripper.jpg" alt="A hand above a dripper brewing into a glass server" width="1200" height="1800" loading="lazy">
+    <img src="menu.jpg" alt="Cups beside the Eleven Coffee menu" width="1800" height="1200" loading="lazy">
+    <img src="tray.jpg" alt="A slice of cake, a glass of water and the menu on a side table" width="1800" height="1200" loading="lazy">
+    <img class="wide" src="table.jpg" alt="Cups and a glass server on the table during a session" width="1800" height="1200" loading="lazy">
+  </div>
+  <p class="back"><a href="/">← Back to home</a></p>
+</main>
+
+<footer>© Bene Sanchez</footer>
+
+<div class="scrim" id="scrim" hidden></div>
+<div class="sheet" id="bio" role="dialog" aria-modal="true" aria-labelledby="bioTitle" hidden>
+  <div class="sheet-head">
+    <h2 id="bioTitle">About Bene Sanchez</h2>
+    <button type="button" class="close" id="bioClose" aria-label="Close">✕</button>
+  </div>
+  <ul class="cred-list">
+    <li><span class="yr">2025</span><span>Philippine National Brewers Cup Champion</span></li>
+    <li><span class="yr">2023</span><span>Philippine National Brewers Cup, 2nd Place</span></li>
+    <li><span class="yr">2023</span><span>April Brewers Cup Champion</span></li>
+  </ul>
+  <p>Bene has been a student of specialty coffee for almost 10 years now. His deep love for manual brewing has turned him from a home brewer into a specialty coffee ambassador, sharing his love for coffee to the world. Through the years, he has refined his craft through countless brewing experiments, workshops from esteemed instructors, and competing. His goal now is to take people along with him on the journey, because the infinite possibilities of coffee are better explored together.</p>
+</div>
+
+<script>
+const bio = document.getElementById("bio"), scrim = document.getElementById("scrim"), trigger = document.getElementById("credTrigger");
+function openBio() { bio.hidden = false; scrim.hidden = false; document.getElementById("bioClose").focus(); }
+function closeBio() { bio.hidden = true; scrim.hidden = true; trigger.focus(); }
+trigger.addEventListener("click", openBio);
+document.getElementById("bioClose").addEventListener("click", closeBio);
+scrim.addEventListener("click", closeBio);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !bio.hidden) closeBio(); });
+</script>
+</body>
+</html>
